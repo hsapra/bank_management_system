@@ -42,6 +42,10 @@ DATABASES = {
 python manage.py runserver.py
 ```
 
+Navigate to `127.0.0.1:8000/bank` and see if runs and shows you a list of URLs available.
+
+Enjoy :)
+
 ## Team 
 Hritik Sapra
 Aazia Azmi
