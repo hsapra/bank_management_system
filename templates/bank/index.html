@@ -1,0 +1,10 @@
+<h1>Available Scenes</h1>
+{% if data %}
+    <ul>
+    {% for name, link in data %}
+        <li><a href="/bank/{{ link }}">{{ name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No links available.</p>
+{% endif %}
