@@ -1,10 +1,16 @@
+{% extends 'bank/header.html' %}
+
+{% block content %}
+
 <h1>Available Scenes</h1>
 {% if data %}
     <ul>
-    {% for name, link in data %}
-        <li><a href="/bank/{{ link }}">{{ name }}</a></li>
+    {% for name, banklink in data %}
+        <li><a href="/bank/{{ banklink }}">{{ name }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
     <p>No links available.</p>
 {% endif %}
+
+{% endblock %}
