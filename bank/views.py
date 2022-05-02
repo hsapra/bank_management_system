@@ -7,6 +7,7 @@ from django.contrib import messages
 from .forms import CreateCorporationForm, CreateBankForm
 from bank.models import Corporation, Bank, Employee, Workfor
 from django.views.decorators.cache import never_cache
+from django.core.cache import cache
 
 def get_url_names():
 	from django.apps import apps
@@ -14,22 +15,56 @@ def get_url_names():
 	list_of_url_names = list()
 	list_of_all_urls = list()
 	for name, app in apps.app_configs.items():
-		print(name)
 		mod_to_import = f'{name}.urls'
-		print(mod_to_import)
 		try:
 			urls = getattr(importlib.import_module(mod_to_import), "urlpatterns")
-			print(urls)
 			list_of_all_urls.extend(urls)
 		except ImportError as ex:
 			# is an app without urls
-			print("Hello")
 			pass
 	for url in list_of_all_urls:
 		list_of_url_names.append((url.name, url.pattern))
 
-	print(list_of_url_names)
 	return list_of_url_names
+
+
+def get_Persons():
+    list_of_people = list(Person.objects.all().values_list('perid', flat=True).distinct())
+
+    # Format needed as (choice, value) and right now the output above is [perId1, perId2......], we need [(perId1, perId1), (perId2, perId2)] 
+
+    tuple_list = []
+
+    for people in list_of_people:
+        tuple_list.append((people, people))
+
+    return tuple_list
+
+def get_Corporations():
+    print("Called Corp")
+    list_of_corps = list(Corporation.objects.all().values_list('corpid', flat=True).distinct())
+
+    # Format needed as (choice, value) and right now the output above is [perId1, perId2......], we need [(perId1, perId1), (perId2, perId2)] 
+
+    tuple_list = []
+
+    for corps in list_of_corps:
+        tuple_list.append((corps, corps))
+
+    return tuple_list
+
+def get_Employees():
+    list_of_emps = list(Employee.objects.all().values_list('perid', flat=True).distinct())
+
+    # Format needed as (choice, value) and right now the output above is [perId1, perId2......], we need [(perId1, perId1), (perId2, perId2)] 
+
+    tuple_list = []
+
+    for emp in list_of_emps:
+        tuple_list.append((emp, emp))
+
+    return tuple_list
+
 
 def index(request):
 	context = {'data': get_url_names()}
@@ -37,6 +72,7 @@ def index(request):
 
 @never_cache
 def create_corporation(request):
+	cache.clear()
 	if request.method == 'POST':
 		# create a form instance and populate it with data from the request:
 		form = CreateCorporationForm(request.POST)
@@ -65,9 +101,10 @@ def create_corporation(request):
 
 @never_cache
 def create_bank(request):
+	cache.clear()
 	if request.method == 'POST':
 		# create a form instance and populate it with data from the request:
-		form = CreateBankForm(request.POST)
+		form = CreateBankForm(request.POST, corporations=get_Corporations(), employees=get_Employees())
 		# check whether it's valid:
 		if form.is_valid():
 			# process the data in form.cleaned_data as required
@@ -96,7 +133,6 @@ def create_bank(request):
 				
 	# if a GET (or any other method) we'll create a blank form
 	else:
-		form = CreateBankForm()
+		form = CreateBankForm(corporations=get_Corporations(), employees=get_Employees())
 
 	return render(request, 'bank/create_bank.html', {'form': form})
-
