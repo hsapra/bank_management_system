@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 
 # Create your views here.
-from .forms import CreateCorporationForm, CreateBankForm
+from .forms import CreateCorporationForm, CreateBankForm, RemoveAccountAccessForm
 from bank.models import (
     Corporation,
     Bank,
@@ -150,7 +150,7 @@ def create_bank(request):
 def remove_account_access(request):
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
-        form = CreateBankForm(request.POST)
+        form = RemoveAccountAccessForm(request.POST)
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
@@ -187,6 +187,13 @@ def remove_account_access(request):
                         bankid=form.cleaned_data["Bank ID"],
                         accountid=form.cleaned_data["Account ID"],
                     ).delete()
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = RemoveAccountAccessForm()
+
+    print()
+
+    return render(request, "bank/remove_account_access.html", {"form": form})
 
 
 @never_cache

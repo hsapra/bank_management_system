@@ -73,7 +73,7 @@ class CreateBankForm(forms.Form):
     )
 
 
-class RemoveAccountAccess(forms.Form):
+class RemoveAccountAccessForm(forms.Form):
     requester = forms.CharField(label="Requester", max_length=100)
     sharer = forms.CharField(label="Sharer", max_length=100)
     bankID = forms.CharField(label="Bank ID", max_length=100)
