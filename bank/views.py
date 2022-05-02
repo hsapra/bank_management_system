@@ -7,7 +7,7 @@ import datetime
 
 # Create your views here.
 from .forms import CreateCorporationForm, CreateBankForm, HireEmployeeForm, ReplaceManagerForm, LoginForm, AccountWithdrawalForm
-from bank.models import Corporation, Bank, Employee, Workfor, Person, Customer, SystemAdmin, BankAccount, Checking, Access
+from bank.models import Corporation, Bank, Employee, Workfor, Person, Customer, SystemAdmin, BankAccount, Checking, Access, Market
 from django.views.decorators.cache import never_cache
 from django.core.cache import cache
 from django.db import IntegrityError
@@ -294,9 +294,11 @@ def account_withdrawal(request):
 				elif is_checking(bankID, accountID):
 					balance = BankAccount.objects.get(bankid = bankID, accountid = accountID).balance or 0
 					overdraft_balance = Checking.objects.get(bankid = bankID, accountid = accountID).amount or 0
+					print(overdraft_balance)
 					if amount > (balance + overdraft_balance):
 						messages.error(request, 'Withdrawal amount cant be greater than balance checking amount plus overdraft balance')
 					elif amount > balance:
+						print("I am here")
 						BankAccount.objects.filter(bankid = bankID, accountid = accountID).update(balance = 0)
 						overdraft_bank = Checking.objects.get(bankid = bankID, accountid = accountID).protectionbank
 						overdraft_account = Checking.objects.get(bankid = bankID, accountid = accountID).protectionaccount
@@ -305,10 +307,31 @@ def account_withdrawal(request):
 						current_date_time = datetime.datetime.now()
 						Access.objects.filter(bankid = bankID, accountid = accountID).update(dtaction = current_date_time)
 						Checking.objects.filter(bankid = bankID, accountid = accountID).update(dtoverdraft = current_date_time)
+						messages.success(request, "Withdrew Amount from Checking + Overdraft")
+					else:
+						BankAccount.objects.filter(bankid = bankID, accountid = accountID).update(balance = balance - amount)
+						current_date_time = datetime.datetime.now()
+						Access.objects.filter(bankid = bankID, accountid = accountID).update(dtaction = current_date_time)
+						messages.success(request, "Withdrew Amount")
 				else:
-					BankAccount.objects.filter(bankid = bankID, accountid = accountID).update(balance = balance - amount)
-					current_date_time = datetime.datetime.now()
-					Access.objects.filter(bankid = bankID, accountid = accountID).update(dtaction = current_date_time)
+					balance = BankAccount.objects.get(bankid = bankID, accountid = accountID).balance or 0
+					if amount > balance:
+						messages.error(request, 'Withdrawal amount cant be greater than balance saving/market account')
+					else:
+						
+						if len(Market.objects.filter(bankid = bankID, accountid = accountID)) > 0:
+							numwithdrawals = Market.objects.get(bankid = bankID, accountid = accountID).numwithdrawals
+							if Market.objects.get(bankid = bankID, accountid = accountID).maxwithdrawals ==  numwithdrawals:
+								messages.error(request, 'Max Withdrawals Reached')
+							else:
+								Market.objects.filter(bankid = bankID, accountid = accountID).update(numwithdrawals = numwithdrawals + 1)
+								BankAccount.objects.filter(bankid = bankID, accountid = accountID).update(balance = balance - (amount))
+								current_date_time = datetime.datetime.now()
+								Access.objects.filter(bankid = bankID, accountid = accountID).update(dtaction = current_date_time)
+						else:
+							BankAccount.objects.filter(bankid = bankID, accountid = accountID).update(balance = balance - (amount))
+							current_date_time = datetime.datetime.now()
+							Access.objects.filter(bankid = bankID, accountid = accountID).update(dtaction = current_date_time)
 			else:
 				messages.error(request, "Invalid Form")
 
