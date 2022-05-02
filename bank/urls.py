@@ -11,4 +11,24 @@ urlpatterns = [
         views.remove_account_access,
         name="remove_account_access",
     ),
+    path(
+        "start_overdraft",
+        views.start_overdraft,
+        name="start_overdraft",
+    ),
+    path(
+        "stop_overdraft",
+        views.stop_overdraft,
+        name="stop_overdraft",
+    ),
+    path(
+        "account_deposit",
+        views.account_deposit,
+        name="account_deposit",
+    ),
+    path(
+        "account_transfer",
+        views.account_transfer,
+        name="account_transfer",
+    ),
 ]

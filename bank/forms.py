@@ -78,3 +78,35 @@ class RemoveAccountAccessForm(forms.Form):
     sharer = forms.CharField(label="Sharer", max_length=100)
     bankID = forms.CharField(label="Bank ID", max_length=100)
     accountID = forms.CharField(label="Account ID", max_length=100)
+
+
+class StartOverdraftForm(forms.Form):
+    requester = forms.CharField(label="Requester", max_length=100)
+    checkingBankID = forms.CharField(label="Checking Bank ID", max_length=100)
+    checkingAccountID = forms.CharField(label="Checking Account ID", max_length=100)
+    savingsBankID = forms.CharField(label="Savings Bank ID", max_length=100)
+    savingsAccountID = forms.CharField(label="Savings Account ID", max_length=100)
+
+
+class StopOverdraftForm(forms.Form):
+    requester = forms.CharField(label="Requester", max_length=100)
+    checkingBankID = forms.CharField(label="Checking Bank ID", max_length=100)
+    checkingAccountID = forms.CharField(label="Checking Account ID", max_length=100)
+
+
+class AccountDepositForm(forms.Form):
+    requester = forms.CharField(label="Requester", max_length=100)
+    depositAmount = forms.IntegerField(label="Deposit Amount")
+    bankID = forms.CharField(label="Bank ID", max_length=100)
+    accountID = forms.CharField(label="Account ID", max_length=100)
+    dtAction = forms.DateField(label="Date of Action")
+
+
+class AccountTransferForm(forms.Form):
+    requester = forms.CharField(label="Requester", max_length=100)
+    transferAmount = forms.IntegerField(label="Transfer Amount")
+    fromBankID = forms.CharField(label="Bank ID", max_length=100)
+    fromAccountID = forms.CharField(label="Account ID", max_length=100)
+    fromBankID = forms.CharField(label="Bank ID", max_length=100)
+    fromAccountID = forms.CharField(label="Account ID", max_length=100)
+    dtAction = forms.DateField(label="Date of Action")

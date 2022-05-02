@@ -4,7 +4,15 @@ from django.http import HttpResponse
 from django.contrib import messages
 
 # Create your views here.
-from .forms import CreateCorporationForm, CreateBankForm, RemoveAccountAccessForm
+from .forms import (
+    CreateCorporationForm,
+    CreateBankForm,
+    RemoveAccountAccessForm,
+    StartOverdraftForm,
+    StopOverdraftForm,
+    AccountDepositForm,
+    AccountTransferForm,
+)
 from bank.models import (
     Corporation,
     Bank,
@@ -16,6 +24,7 @@ from bank.models import (
     InterestBearingFees,
     Checking,
     Savings,
+    BankAccount,
 )
 from django.views.decorators.cache import never_cache
 
@@ -157,45 +166,246 @@ def remove_account_access(request):
             # ...
             # redirect to a new URL:
             if (
-                len(SystemAdmin.objects.filter(perid=form.cleaned_data["Requester"]))
+                len(SystemAdmin.objects.filter(perid=form.cleaned_data["requester"]))
                 > 0
             ) or (
                 len(
                     Access.objects.filter(
-                        bankid=form.cleaned_data["Bank ID"],
-                        accountid=form.cleaned_data["Account ID"],
-                        perid=form.cleaned_data["Requester"],
+                        bankid=form.cleaned_data["bankID"],
+                        accountid=form.cleaned_data["accountID"],
+                        perid=form.cleaned_data["requester"],
                     )
                 )
                 > 0
             ):
                 Access.objects.filter(
-                    bankid=form.cleaned_data["Bank ID"],
-                    accountid=form.cleaned_data["Account ID"],
-                    perid=form.cleaned_data["Sharer"],
+                    bankid=form.cleaned_data["bankID"],
+                    accountid=form.cleaned_data["accountID"],
+                    perid=form.cleaned_data["sharer"],
                 ).delete()
-                if len(Access.objects.filter(bankid=form.cleaned_data["Bank ID"])) <= 1:
+                if len(Access.objects.filter(bankid=form.cleaned_data["bankID"])) <= 1:
                     InterestBearingFees.objects.filter(
-                        bankid=form.cleaned_data["Bank ID"],
-                        accountid=form.cleaned_data["Account ID"],
+                        bankid=form.cleaned_data["bankID"],
+                        accountid=form.cleaned_data["accountID"],
                     ).delete()
                     Checking.objects.filter(
-                        bankid=form.cleaned_data["Bank ID"],
-                        accountid=form.cleaned_data["Account ID"],
+                        bankid=form.cleaned_data["bankID"],
+                        accountid=form.cleaned_data["accountID"],
                     ).delete()
                     Savings.objects.filter(
-                        bankid=form.cleaned_data["Bank ID"],
-                        accountid=form.cleaned_data["Account ID"],
+                        bankid=form.cleaned_data["bankID"],
+                        accountid=form.cleaned_data["accountID"],
                     ).delete()
+                messages.success(request, "Access Removed Successfully!")
+            else:
+                messages.error(request, "Requester does not have authorization!")
     # if a GET (or any other method) we'll create a blank form
     else:
         form = RemoveAccountAccessForm()
-
-    print()
 
     return render(request, "bank/remove_account_access.html", {"form": form})
 
 
 @never_cache
-def Start_overdraft(request):
+def start_overdraft(request):
+    if request.method == "POST":
+        # create a form instance and populate it with data from the request:
+        form = StartOverdraftForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            if (
+                len(SystemAdmin.objects.filter(perid=form.cleaned_data["requester"]))
+                > 0
+            ) or (
+                (
+                    len(
+                        Access.objects.filter(
+                            bankid=form.cleaned_data["checkingBankID"],
+                            accountid=form.cleaned_data["checkingAccountID"],
+                            perid=form.cleaned_data["requester"],
+                        )
+                    )
+                    > 0
+                )
+                and (
+                    len(
+                        Access.objects.filter(
+                            bankid=form.cleaned_data["savingsBankID"],
+                            accountid=form.cleaned_data["savingsAccountID"],
+                            perid=form.cleaned_data["requester"],
+                        )
+                    )
+                    > 0
+                )
+            ):
+                Checking.objects.filter(
+                    bankid=form.cleaned_data["checkingBankID"],
+                    accountid=form.cleaned_data["checkingAccountID"],
+                ).update(
+                    protectionbank=form.cleaned_data["savingsBankID"],
+                    protectionaccount=form.cleaned_data["savingsAccountID"],
+                    amount=None,
+                    dtoverdraft=None,
+                )
+                messages.success(request, "Started Overdraft Successfully!")
+            else:
+                messages.error(request, "Requester does not have authorization!")
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = StartOverdraftForm()
+
+    return render(request, "bank/start_overdraft.html", {"form": form})
+
+
+@never_cache
+def stop_overdraft(request):
+    if request.method == "POST":
+        # create a form instance and populate it with data from the request:
+        form = StopOverdraftForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            if (
+                len(SystemAdmin.objects.filter(perid=form.cleaned_data["requester"]))
+                > 0
+            ) or (
+                len(
+                    Access.objects.filter(
+                        bankid=form.cleaned_data["checkingBankID"],
+                        accountid=form.cleaned_data["checkingAccountID"],
+                        perid=form.cleaned_data["requester"],
+                    )
+                )
+                > 0
+            ):
+                Checking.objects.filter(
+                    bankid=form.cleaned_data["checkingBankID"],
+                    accountid=form.cleaned_data["checkingAccountID"],
+                ).update(
+                    protectionbank=None,
+                    protectionaccount=None,
+                    amount=None,
+                    dtoverdraft=None,
+                )
+                messages.success(request, "Stopped Overdraft Successfully!")
+            else:
+                messages.error(request, "Requester does not have authorization!")
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = StopOverdraftForm()
+
+    return render(request, "bank/stop_overdraft.html", {"form": form})
+
+
+@never_cache
+def account_deposit(request):
+    if request.method == "POST":
+        # create a form instance and populate it with data from the request:
+        form = AccountDepositForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            if (
+                len(
+                    Access.objects.filter(
+                        bankid=form.cleaned_data["bankID"],
+                        accountid=form.cleaned_data["accountID"],
+                        perid=form.cleaned_data["requester"],
+                    )
+                )
+                > 0
+            ):
+                bal = int(
+                    BankAccount.objects.filter(
+                        bankid=form.cleaned_data["bankID"],
+                        accountid=form.cleaned_data["accountID"],
+                    ).values_list("balance", flat=True)[0]
+                )
+                if bal == None:
+                    bal = 0
+                BankAccount.objects.filter(
+                    bankid=form.cleaned_data["bankID"],
+                    accountid=form.cleaned_data["accountID"],
+                ).update(balance=bal + form.cleaned_data["depositAmount"])
+                Access.objects.filter(
+                    perid=form.cleaned_data["requester"],
+                    bankid=form.cleaned_data["bankID"],
+                    accountid=form.cleaned_data["accountID"],
+                ).update(dtaction=form.cleaned_data["dtAction"])
+                messages.success(request, "Deposited to Account Successfully!")
+            else:
+                messages.error(request, "Requester does not have authorization!")
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = AccountDepositForm()
+
+    return render(request, "bank/account_deposit.html", {"form": form})
+
+
+@never_cache
+def account_withdrawal(request):
     pass
+
+
+@never_cache
+def account_transfer(request):
+    pass
+    if request.method == "POST":
+        # create a form instance and populate it with data from the request:
+        form = AccountTransferForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            if (
+                len(
+                    Access.objects.filter(
+                        bankid=form.cleaned_data["fromBankID"],
+                        accountid=form.cleaned_data["fromAccountID"],
+                        perid=form.cleaned_data["requester"],
+                    )
+                )
+                > 0
+            ) and (
+                len(
+                    Access.objects.filter(
+                        bankid=form.cleaned_data["toBankID"],
+                        accountid=form.cleaned_data["toAccountID"],
+                        perid=form.cleaned_data["requester"],
+                    )
+                )
+                > 0
+            ):
+                ogbal = int(
+                    BankAccount.objects.filter(
+                        bankid=form.cleaned_data["fromBankID"],
+                        accountid=form.cleaned_data["fromAccountID"],
+                    ).values_list("balance", flat=True)[0]
+                )
+                if ogbal == None:
+                    ogbal = 0
+                # call account withdrawal on from account
+                if ogbal != int(
+                    BankAccount.objects.filter(
+                        bankid=form.cleaned_data["fromBankID"],
+                        accountid=form.cleaned_data["fromAccountID"],
+                    ).values_list("balance", flat=True)[0]
+                ):
+                    # call account deposit on to account
+                    messages.success(request, "Transferred Successfully!")
+            else:
+                messages.error(request, "Requester does not have authorization!")
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = AccountTransferForm()
+
+    return render(request, "bank/account_transfer.html", {"form": form})
