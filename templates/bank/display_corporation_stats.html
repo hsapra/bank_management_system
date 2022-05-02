@@ -1,0 +1,34 @@
+<!-- # need corporation_identifier, short_name, formal_name, number_of_banks, corporation_assets, total_assets -->
+<html>
+<head>
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+</head>
+<body>
+
+<h1>Corporation Stats</h1>
+
+<table>
+    <tr>
+        <th>Corporation ID</th>
+        <th>Short Name</th>
+        <th>Formal Name</th>
+        <th>Number of Banks</th>
+        <th>Corporation Assets</th>
+        <th>Total Assets</th>
+    </tr>
+    {% for entry in joined_table %}
+    <tr>
+        <td>{{ entry.corp_id }}</td>
+        <td>{{ entry.short_name }}</td>
+        <td>{{ entry.formal_name }}</td>
+        <td>{{ entry.num_banks}}</td>
+        <td>{{ entry.corp_assets }}</td>
+        <td>{{ entry.total_assets }}</td>
+        
+    </tr>
+    {% endfor %}
+</table>

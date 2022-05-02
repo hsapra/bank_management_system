@@ -1,0 +1,44 @@
+<!-- # need person_identifier, tax_identifier, employee_name, date_of_birth, joined_system, street, city, state, zip, number_of_banks, bank_assets -->
+<html>
+<head>
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+</head>
+<body>
+
+<h1>Employee Stats</h1>
+
+<table>
+    <tr>
+        <th>Person ID</th>
+        <th>Tax ID</th>
+        <th>Employee Name</th>
+        <th>Date of Birth</th>
+        <th>Date Joined System</th>
+        <th>Street</th>
+        <th>City</th>
+        <th>State</th>
+        <th>Zip</th>
+        <th>Number of Banks</th>
+        <th>Bank Assets</th>
+    </tr>
+    {% for entry in joined_table %}
+    <tr>
+        <td>{{ entry.per_id }}</td>
+        <td>{{ entry.tax_id }}</td>
+        <td>{{ entry.employee_name }}</td>
+        <td>{{ entry.date_of_birth}}</td>
+        <td>{{ entry.joined_system }}</td>
+        <td>{{ entry.street }}</td>
+        <td>{{ entry.city }}</td>
+        <td>{{ entry.state }}</td>
+        <td>{{ entry.zip }}</td>
+        <td>{{ entry.number_of_banks }}</td>
+        <td>{{ entry.bank_assets }}</td>
+        
+    </tr>
+    {% endfor %}
+</table>
