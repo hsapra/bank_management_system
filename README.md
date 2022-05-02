@@ -39,7 +39,7 @@ DATABASES = {
 ## Usage
 
 ```bash
-python manage.py runserver.py
+python manage.py runserver
 ```
 
 Navigate to `127.0.0.1:8000/bank` and see if runs and shows you a list of URLs available.
