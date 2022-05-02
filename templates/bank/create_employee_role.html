@@ -1,0 +1,6 @@
+<h3>Create Employee Role</h3>
+<form action="/bank/create_employee_role" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
+</form>
