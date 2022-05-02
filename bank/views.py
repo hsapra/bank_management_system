@@ -28,6 +28,11 @@ from bank.models import (
 )
 from django.views.decorators.cache import never_cache
 
+import datetime
+
+# yyyy-mm-dd
+today = datetime.datetime.now().date()
+
 
 def get_url_names():
     from django.apps import apps
@@ -338,7 +343,7 @@ def account_deposit(request):
                     perid=form.cleaned_data["requester"],
                     bankid=form.cleaned_data["bankID"],
                     accountid=form.cleaned_data["accountID"],
-                ).update(dtaction=form.cleaned_data["dtAction"])
+                ).update(dtaction=today)
                 messages.success(request, "Deposited to Account Successfully!")
             else:
                 messages.error(request, "Requester does not have authorization!")
@@ -392,14 +397,31 @@ def account_transfer(request):
                 )
                 if ogbal == None:
                     ogbal = 0
-                # call account withdrawal on from account
+                # withdrawal from account
                 if ogbal != int(
                     BankAccount.objects.filter(
                         bankid=form.cleaned_data["fromBankID"],
                         accountid=form.cleaned_data["fromAccountID"],
                     ).values_list("balance", flat=True)[0]
                 ):
-                    # call account deposit on to account
+                    # deposit to account
+                    bal = int(
+                        BankAccount.objects.filter(
+                            bankid=form.cleaned_data["bankID"],
+                            accountid=form.cleaned_data["accountID"],
+                        ).values_list("balance", flat=True)[0]
+                    )
+                    if bal == None:
+                        bal = 0
+                    BankAccount.objects.filter(
+                        bankid=form.cleaned_data["bankID"],
+                        accountid=form.cleaned_data["accountID"],
+                    ).update(balance=bal + form.cleaned_data["depositAmount"])
+                    Access.objects.filter(
+                        perid=form.cleaned_data["requester"],
+                        bankid=form.cleaned_data["bankID"],
+                        accountid=form.cleaned_data["accountID"],
+                    ).update(dtaction=today)
                     messages.success(request, "Transferred Successfully!")
             else:
                 messages.error(request, "Requester does not have authorization!")
