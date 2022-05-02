@@ -1,7 +1,11 @@
 from django import forms
-from .models import Employee, Person, Corporation, Bank
+from .models import Employee, Person, Corporation, Bank, BankAccount
 from django.views.decorators.cache import never_cache
 from django.core.cache import cache
+
+class LoginForm(forms.Form):
+    perID = forms.CharField(label='User ID', max_length=100)
+    pwd = forms.CharField(label='Password', max_length=100)
 
 class CreateCorporationForm(forms.Form):
     corpID = forms.CharField(label='Corporation ID', max_length=100)
@@ -32,3 +36,52 @@ class CreateBankForm(forms.Form):
     class Meta:
         model = Bank
         fields = ('bankid', 'bankname', 'street', 'city', 'state', 'zip', 'resassets', 'corpid', 'manager', 'bank_employee',)
+
+
+class HireEmployeeForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.employees = kwargs.pop('employees')
+        self.banks = kwargs.pop('banks')
+        super(HireEmployeeForm, self).__init__(*args, **kwargs)
+        self.fields['bankID'].widget = forms.Select(choices=self.banks)
+        self.fields['perID'].widget = forms.Select(choices=self.employees)
+
+    bankID = forms.CharField(label='Bank ID')
+    perID = forms.CharField(label='Employee')
+    salary = forms.IntegerField(label='Salary')
+
+    class Meta:
+        model = Employee
+        fields = ('bankid', 'perid', 'salary',)
+
+class ReplaceManagerForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.employees = kwargs.pop('employees')
+        self.banks = kwargs.pop('banks')
+        super(ReplaceManagerForm, self).__init__(*args, **kwargs)
+        self.fields['bankID'].widget = forms.Select(choices=self.banks)
+        self.fields['perID'].widget = forms.Select(choices=self.employees)
+
+    bankID = forms.CharField(label='Bank ID')
+    perID = forms.CharField(label='Employee')
+    salary = forms.IntegerField(label='Salary')
+
+    class Meta:
+        model = Employee
+        fields = ('bankid', 'perid', 'salary',)
+
+class AccountWithdrawalForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.accounts = kwargs.pop('accounts')
+        self.banks = kwargs.pop('banks')
+        super(AccountWithdrawalForm, self).__init__(*args, **kwargs)
+        self.fields['bankID'].widget = forms.Select(choices=self.banks)
+        self.fields['accountID'].widget = forms.Select(choices=self.accounts)
+
+    bankID = forms.CharField(label='Bank ID')
+    accountID = forms.CharField(label='Account ID')
+    amount = forms.IntegerField(label='amount')
+
+    class Meta:
+        model = BankAccount
+        fields = ('bankid', 'accountID', 'amount',)
