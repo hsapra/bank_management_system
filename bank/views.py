@@ -4,7 +4,6 @@ from django.http import HttpResponse
 from django.contrib import messages
 import datetime
 
-
 # Create your views here.
 from .forms import (
     CreateCorporationForm,
@@ -38,8 +37,6 @@ from django.views.decorators.cache import never_cache
 from django.core.cache import cache
 from django.db import IntegrityError
 from psycopg2.errorcodes import UNIQUE_VIOLATION
-
-import datetime
 
 # yyyy-mm-dd
 today = datetime.datetime.now().date()
@@ -134,6 +131,21 @@ def get_Banks():
 
     for bank in list_of_banks:
         tuple_list.append((bank, bank))
+
+    return tuple_list
+
+
+def get_Bank_users():
+    list_of_bank_users = list(
+        Bank.objects.all().values_list("perid", flat=True).distinct()
+    )
+
+    # Format needed as (choice, value) and right now the output above is [perId1, perId2......], we need [(perId1, perId1), (perId2, perId2)]
+
+    tuple_list = []
+
+    for perid in list_of_bank_users:
+        tuple_list.append((perid, perid))
 
     return tuple_list
 
@@ -311,21 +323,25 @@ def create_bank(request):
 def remove_account_access(request):
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
-        form = RemoveAccountAccessForm(request.POST)
+        form = RemoveAccountAccessForm(
+            request.POST,
+            accounts=get_Accounts(),
+            banks=get_Banks(),
+            bank_users=get_Bank_users(),
+        )
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
             # ...
             # redirect to a new URL:
             if (
-                len(SystemAdmin.objects.filter(perid=form.cleaned_data["requester"]))
-                > 0
+                request.session["perID"] is not None and request.session["isAdmin"]
             ) or (
                 len(
                     Access.objects.filter(
                         bankid=form.cleaned_data["bankID"],
                         accountid=form.cleaned_data["accountID"],
-                        perid=form.cleaned_data["requester"],
+                        perid=request.session["perID"],
                     )
                 )
                 > 0
@@ -353,7 +369,9 @@ def remove_account_access(request):
                 messages.error(request, "Requester does not have authorization!")
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = RemoveAccountAccessForm()
+        form = RemoveAccountAccessForm(
+            accounts=get_Accounts(), banks=get_Banks(), bank_users=get_Bank_users()
+        )
 
     return render(request, "bank/remove_account_access.html", {"form": form})
 
@@ -362,22 +380,23 @@ def remove_account_access(request):
 def start_overdraft(request):
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
-        form = StartOverdraftForm(request.POST)
+        form = StartOverdraftForm(
+            request.POST, accounts=get_Accounts(), banks=get_Banks()
+        )
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
             # ...
             # redirect to a new URL:
             if (
-                len(SystemAdmin.objects.filter(perid=form.cleaned_data["requester"]))
-                > 0
+                request.session["perID"] is not None and request.session["isAdmin"]
             ) or (
                 (
                     len(
                         Access.objects.filter(
                             bankid=form.cleaned_data["checkingBankID"],
                             accountid=form.cleaned_data["checkingAccountID"],
-                            perid=form.cleaned_data["requester"],
+                            perid=request.session["perID"],
                         )
                     )
                     > 0
@@ -387,7 +406,7 @@ def start_overdraft(request):
                         Access.objects.filter(
                             bankid=form.cleaned_data["savingsBankID"],
                             accountid=form.cleaned_data["savingsAccountID"],
-                            perid=form.cleaned_data["requester"],
+                            perid=request.session["perID"],
                         )
                     )
                     > 0
@@ -407,7 +426,7 @@ def start_overdraft(request):
                 messages.error(request, "Requester does not have authorization!")
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = StartOverdraftForm()
+        form = StartOverdraftForm(accounts=get_Accounts(), banks=get_Banks())
 
     return render(request, "bank/start_overdraft.html", {"form": form})
 
@@ -416,21 +435,22 @@ def start_overdraft(request):
 def stop_overdraft(request):
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
-        form = StopOverdraftForm(request.POST)
+        form = StopOverdraftForm(
+            request.POST, accounts=get_Accounts(), banks=get_Banks()
+        )
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
             # ...
             # redirect to a new URL:
             if (
-                len(SystemAdmin.objects.filter(perid=form.cleaned_data["requester"]))
-                > 0
+                request.session["perID"] is not None and request.session["isAdmin"]
             ) or (
                 len(
                     Access.objects.filter(
                         bankid=form.cleaned_data["checkingBankID"],
                         accountid=form.cleaned_data["checkingAccountID"],
-                        perid=form.cleaned_data["requester"],
+                        perid=request.session["perID"],
                     )
                 )
                 > 0
@@ -449,7 +469,7 @@ def stop_overdraft(request):
                 messages.error(request, "Requester does not have authorization!")
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = StopOverdraftForm()
+        form = StopOverdraftForm(accounts=get_Accounts(), banks=get_Banks())
 
     return render(request, "bank/stop_overdraft.html", {"form": form})
 
@@ -527,7 +547,9 @@ def replace_manager(request):
 def account_deposit(request):
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
-        form = AccountDepositForm(request.POST)
+        form = AccountDepositForm(
+            request.POST, accounts=get_Accounts(), banks=get_Banks()
+        )
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
@@ -538,7 +560,7 @@ def account_deposit(request):
                     Access.objects.filter(
                         bankid=form.cleaned_data["bankID"],
                         accountid=form.cleaned_data["accountID"],
-                        perid=form.cleaned_data["requester"],
+                        perid=request.session["perID"],
                     )
                 )
                 > 0
@@ -556,7 +578,7 @@ def account_deposit(request):
                     accountid=form.cleaned_data["accountID"],
                 ).update(balance=bal + form.cleaned_data["depositAmount"])
                 Access.objects.filter(
-                    perid=form.cleaned_data["requester"],
+                    perid=request.session["perID"],
                     bankid=form.cleaned_data["bankID"],
                     accountid=form.cleaned_data["accountID"],
                 ).update(dtaction=today)
@@ -565,7 +587,7 @@ def account_deposit(request):
                 messages.error(request, "Requester does not have authorization!")
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = AccountDepositForm()
+        form = AccountDepositForm(accounts=get_Accounts(), banks=get_Banks())
 
     return render(request, "bank/account_deposit.html", {"form": form})
 
@@ -665,7 +687,9 @@ def account_transfer(request):
     pass
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
-        form = AccountTransferForm(request.POST)
+        form = AccountTransferForm(
+            request.POST, accounts=get_Accounts(), banks=get_Banks()
+        )
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
@@ -676,7 +700,7 @@ def account_transfer(request):
                     Access.objects.filter(
                         bankid=form.cleaned_data["fromBankID"],
                         accountid=form.cleaned_data["fromAccountID"],
-                        perid=form.cleaned_data["requester"],
+                        perid=request.session["perID"],
                     )
                 )
                 > 0
@@ -685,7 +709,7 @@ def account_transfer(request):
                     Access.objects.filter(
                         bankid=form.cleaned_data["toBankID"],
                         accountid=form.cleaned_data["toAccountID"],
-                        perid=form.cleaned_data["requester"],
+                        perid=request.session["perID"],
                     )
                 )
                 > 0
@@ -719,7 +743,7 @@ def account_transfer(request):
                         accountid=form.cleaned_data["accountID"],
                     ).update(balance=bal + form.cleaned_data["depositAmount"])
                     Access.objects.filter(
-                        perid=form.cleaned_data["requester"],
+                        perid=request.session["perID"],
                         bankid=form.cleaned_data["bankID"],
                         accountid=form.cleaned_data["accountID"],
                     ).update(dtaction=today)
@@ -729,6 +753,6 @@ def account_transfer(request):
 
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = AccountTransferForm()
+        form = AccountTransferForm(accounts=get_Accounts(), banks=get_Banks())
 
     return render(request, "bank/account_transfer.html", {"form": form})
