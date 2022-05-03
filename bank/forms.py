@@ -120,7 +120,7 @@ class RemoveAccountAccessForm(forms.Form):
         self.accounts = kwargs.pop("accounts")
         self.banks = kwargs.pop("banks")
         self.bank_users = kwargs.pop("bank_users")
-        super(AccountWithdrawalForm, self).__init__(*args, **kwargs)
+        super(RemoveAccountAccessForm, self).__init__(*args, **kwargs)
         self.fields["bankID"].widget = forms.Select(choices=self.banks)
         self.fields["accountID"].widget = forms.Select(choices=self.accounts)
         self.fields["sharer"].widget = forms.Select(choices=self.bank_users)
@@ -142,7 +142,7 @@ class StartOverdraftForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.accounts = kwargs.pop("accounts")
         self.banks = kwargs.pop("banks")
-        super(AccountWithdrawalForm, self).__init__(*args, **kwargs)
+        super(StartOverdraftForm, self).__init__(*args, **kwargs)
         self.fields["checkingBankID"].widget = forms.Select(choices=self.banks)
         self.fields["checkingAccountID"].widget = forms.Select(choices=self.accounts)
         self.fields["savingsBankID"].widget = forms.Select(choices=self.banks)
@@ -167,7 +167,7 @@ class StopOverdraftForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.accounts = kwargs.pop("accounts")
         self.banks = kwargs.pop("banks")
-        super(AccountWithdrawalForm, self).__init__(*args, **kwargs)
+        super(StopOverdraftForm, self).__init__(*args, **kwargs)
         self.fields["checkingBankID"].widget = forms.Select(choices=self.banks)
         self.fields["checkingAccountID"].widget = forms.Select(choices=self.accounts)
 
@@ -186,7 +186,7 @@ class AccountDepositForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.accounts = kwargs.pop("accounts")
         self.banks = kwargs.pop("banks")
-        super(AccountWithdrawalForm, self).__init__(*args, **kwargs)
+        super(AccountDepositForm, self).__init__(*args, **kwargs)
         self.fields["bankID"].widget = forms.Select(choices=self.banks)
         self.fields["accountID"].widget = forms.Select(choices=self.accounts)
 
@@ -207,7 +207,7 @@ class AccountTransferForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.accounts = kwargs.pop("accounts")
         self.banks = kwargs.pop("banks")
-        super(AccountWithdrawalForm, self).__init__(*args, **kwargs)
+        super(AccountTransferForm, self).__init__(*args, **kwargs)
         self.fields["fromBankID"].widget = forms.Select(choices=self.banks)
         self.fields["fromAccountID"].widget = forms.Select(choices=self.accounts)
         self.fields["toBankID"].widget = forms.Select(choices=self.banks)

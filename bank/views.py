@@ -32,6 +32,8 @@ from bank.models import (
     BankAccount,
     Customer,
     Person,
+    BankUser,
+    Market,
 )
 from django.views.decorators.cache import never_cache
 from django.core.cache import cache
@@ -137,7 +139,7 @@ def get_Banks():
 
 def get_Bank_users():
     list_of_bank_users = list(
-        Bank.objects.all().values_list("perid", flat=True).distinct()
+        BankUser.objects.all().values_list("perid", flat=True).distinct()
     )
 
     # Format needed as (choice, value) and right now the output above is [perId1, perId2......], we need [(perId1, perId1), (perId2, perId2)]
@@ -351,7 +353,15 @@ def remove_account_access(request):
                     accountid=form.cleaned_data["accountID"],
                     perid=form.cleaned_data["sharer"],
                 ).delete()
-                if len(Access.objects.filter(bankid=form.cleaned_data["bankID"])) <= 1:
+                if (
+                    len(
+                        Access.objects.filter(
+                            bankid=form.cleaned_data["bankID"],
+                            accountid=form.cleaned_data["accountID"],
+                        )
+                    )
+                    < 1
+                ):
                     InterestBearingFees.objects.filter(
                         bankid=form.cleaned_data["bankID"],
                         accountid=form.cleaned_data["accountID"],
@@ -361,6 +371,14 @@ def remove_account_access(request):
                         accountid=form.cleaned_data["accountID"],
                     ).delete()
                     Savings.objects.filter(
+                        bankid=form.cleaned_data["bankID"],
+                        accountid=form.cleaned_data["accountID"],
+                    ).delete()
+                    InterestBearing.objects.filter(
+                        bankid=form.cleaned_data["bankID"],
+                        accountid=form.cleaned_data["accountID"],
+                    ).delete()
+                    BankAccount.objects.filter(
                         bankid=form.cleaned_data["bankID"],
                         accountid=form.cleaned_data["accountID"],
                     ).delete()
@@ -654,20 +672,18 @@ def account_withdrawal(request):
                         BankAccount.objects.filter(
                             bankid=overdraft_bank, accountid=overdraft_account
                         ).update(balance=saving_account_balance - (amount - balance))
-                        current_date_time = datetime.datetime.now()
                         Access.objects.filter(
                             bankid=bankID, accountid=accountID
-                        ).update(dtaction=current_date_time)
+                        ).update(dtaction=today)
                         Checking.objects.filter(
                             bankid=bankID, accountid=accountID
-                        ).update(dtoverdraft=current_date_time)
+                        ).update(dtoverdraft=today)
                 else:
                     BankAccount.objects.filter(
                         bankid=bankID, accountid=accountID
                     ).update(balance=balance - amount)
-                    current_date_time = datetime.datetime.now()
                     Access.objects.filter(bankid=bankID, accountid=accountID).update(
-                        dtaction=current_date_time
+                        dtaction=today
                     )
             else:
                 messages.error(request, "Invalid Form")
@@ -722,7 +738,127 @@ def account_transfer(request):
                 )
                 if ogbal == None:
                     ogbal = 0
+
                 # withdrawal from account
+                if is_checking(
+                    form.cleaned_data["fromBankID"], form.cleaned_data["fromAccountID"]
+                ):
+                    balance = (
+                        BankAccount.objects.get(
+                            bankid=form.cleaned_data["fromBankID"],
+                            accountid=form.cleaned_data["fromAccountID"],
+                        ).balance
+                        or 0
+                    )
+                    bankID = form.cleaned_data["fromBankID"]
+                    accountID = form.cleaned_data["fromAccountID"]
+                    protection_bank_id = Checking.objects.get(
+                        bankid=form.cleaned_data["fromBankID"],
+                        accountid=form.cleaned_data["fromAccountID"],
+                    ).protectionbank
+                    protection_account_id = Checking.objects.get(
+                        bankid=form.cleaned_data["fromBankID"],
+                        accountid=form.cleaned_data["fromAccountID"],
+                    ).protectionaccount
+                    if protection_bank_id and protection_account_id:
+                        saving_account_balance = BankAccount.objects.filter(
+                            bankid=protection_bank_id, accountid=protection_account_id
+                        ).balance
+                    else:
+                        saving_account_balance = 0
+                    if form.cleaned_data["transferAmount"] > (
+                        balance + saving_account_balance
+                    ):
+                        messages.error(
+                            request,
+                            "Withdrawal amount cant be greater than balance checking amount plus overdraft balance",
+                        )
+                    elif form.cleaned_data["transferAmount"] <= balance:
+                        BankAccount.objects.filter(
+                            bankid=bankID, accountid=accountID
+                        ).update(balance=balance - form.cleaned_data["transferAmount"])
+                        Access.objects.filter(
+                            bankid=bankID, accountid=accountID
+                        ).update(dtaction=today)
+                        print(bankID)
+                        print(accountID)
+                        messages.success(request, "Withdrew Amount")
+                    else:
+                        bankID = (form.cleaned_data["fromBankID"],)
+                        accountID = (form.cleaned_data["fromAccountID"],)
+                        BankAccount.objects.filter(
+                            bankid=bankID, accountid=accountID
+                        ).update(balance=0)
+                        BankAccount.objects.filter(
+                            bankid=protection_bank_id, accountid=protection_account_id
+                        ).update(
+                            balance=saving_account_balance
+                            - (form.cleaned_data["transferAmount"] - balance)
+                        )
+                        Access.objects.filter(
+                            bankid=bankID, accountid=accountID
+                        ).update(dtaction=today)
+                        Checking.objects.filter(
+                            bankid=bankID, accountid=accountID
+                        ).update(dtoverdraft=today)
+                        messages.success(
+                            request, "Withdrew Amount from Checking + Overdraft"
+                        )
+
+                else:
+                    balance = (
+                        BankAccount.objects.get(
+                            bankid=bankID, accountid=accountID
+                        ).balance
+                        or 0
+                    )
+                    if form.cleaned_data["transferAmount"] > balance:
+                        messages.error(
+                            request,
+                            "Withdrawal amount cant be greater than balance saving/market account",
+                        )
+                    else:
+                        if (
+                            len(
+                                Market.objects.filter(
+                                    bankid=bankID, accountid=accountID
+                                )
+                            )
+                            > 0
+                        ):
+                            numwithdrawals = Market.objects.get(
+                                bankid=bankID, accountid=accountID
+                            ).numwithdrawals
+                            if (
+                                Market.objects.get(
+                                    bankid=bankID, accountid=accountID
+                                ).maxwithdrawals
+                                == numwithdrawals
+                            ):
+                                messages.error(request, "Max Withdrawals Reached")
+                            else:
+                                Market.objects.filter(
+                                    bankid=bankID, accountid=accountID
+                                ).update(numwithdrawals=numwithdrawals + 1)
+                                BankAccount.objects.filter(
+                                    bankid=bankID, accountid=accountID
+                                ).update(
+                                    balance=balance
+                                    - (form.cleaned_data["transferAmount"])
+                                )
+                                Access.objects.filter(
+                                    bankid=bankID, accountid=accountID
+                                ).update(dtaction=today)
+                        else:
+                            BankAccount.objects.filter(
+                                bankid=bankID, accountid=accountID
+                            ).update(
+                                balance=balance - (form.cleaned_data["transferAmount"])
+                            )
+                            Access.objects.filter(
+                                bankid=bankID, accountid=accountID
+                            ).update(dtaction=today)
+
                 if ogbal != int(
                     BankAccount.objects.filter(
                         bankid=form.cleaned_data["fromBankID"],
@@ -732,22 +868,24 @@ def account_transfer(request):
                     # deposit to account
                     bal = int(
                         BankAccount.objects.filter(
-                            bankid=form.cleaned_data["bankID"],
-                            accountid=form.cleaned_data["accountID"],
+                            bankid=form.cleaned_data["toBankID"],
+                            accountid=form.cleaned_data["toAccountID"],
                         ).values_list("balance", flat=True)[0]
                     )
                     if bal == None:
                         bal = 0
                     BankAccount.objects.filter(
-                        bankid=form.cleaned_data["bankID"],
-                        accountid=form.cleaned_data["accountID"],
-                    ).update(balance=bal + form.cleaned_data["depositAmount"])
+                        bankid=form.cleaned_data["toBankID"],
+                        accountid=form.cleaned_data["toAccountID"],
+                    ).update(balance=bal + form.cleaned_data["transferAmount"])
                     Access.objects.filter(
                         perid=request.session["perID"],
-                        bankid=form.cleaned_data["bankID"],
-                        accountid=form.cleaned_data["accountID"],
+                        bankid=form.cleaned_data["toBankID"],
+                        accountid=form.cleaned_data["toAccountID"],
                     ).update(dtaction=today)
                     messages.success(request, "Transferred Successfully!")
+                else:
+                    messages.error(request, "Withdrawal failed!")
             else:
                 messages.error(request, "Requester does not have authorization!")
 
