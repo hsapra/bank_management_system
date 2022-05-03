@@ -459,7 +459,10 @@ def stop_employee_and_customer_role(request):
                 # accountId_list = Access.objects.filter(Access.objects.count(accountid) == 1).values_list('accountid', flat=True)
                 # accountID_list = Access.objects.filter(Access.objects.count(accountid) == 1)
                 
-                # TODO
+                # TODO impelment accountId in (select accountID from access group by accountID having count(*) = 1))
+                #  I guess you don't need this because there is not an account..? Or do we get the account for the specific person. 
+                # accountid_list = Access.objects.filter(Access.objects.count(Access.accountid) == 1).values_list('accountid', flat=True)
+                
                 if len(Access.objects.filter(perid = form2.cleaned_data['perID'])) == 0:
                     
                     if len(Employee.objects.filter(perid = form2.cleaned_data['perID'])) > 0:
