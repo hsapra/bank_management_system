@@ -1,5 +1,11 @@
+{% extends 'bank/header.html' %}
+
+{% block content %}
+
 <form action="/bank/create_corporation" method="post">
     {% csrf_token %}
     {{ form }}
     <input type="submit" value="Submit">
 </form>
+
+{% endblock %}

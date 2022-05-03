@@ -7,7 +7,6 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
-
 class Access(models.Model):
     perid = models.ForeignKey('Customer', models.DO_NOTHING, db_column='perID', related_name='+')  # Field name made lowercase.
     bankid = models.OneToOneField('BankAccount', models.DO_NOTHING, db_column='bankID', primary_key=True)  # Field name made lowercase.
