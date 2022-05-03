@@ -1,0 +1,23 @@
+{% extends 'bank/header.html' %}
+
+{% block content %}
+
+
+
+<h3>Stop Employee Role</h3>
+<form action="/bank/stop_employee_role" method="post">
+    {% csrf_token %}
+    {{ form1 }}
+    <input type="submit" value="Submit">
+</form>
+
+<br>
+
+<h3>Stop Customer Role</h3>
+<form action="/bank/stop_customer_role" method="post">
+    {% csrf_token %}
+    {{ form2 }}
+    <input type="submit" value="Submit">
+</form>
+
+{% endblock %}

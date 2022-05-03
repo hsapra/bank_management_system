@@ -6,12 +6,16 @@ import datetime
 
 
 # Create your views here.
-from .forms import CreateCorporationForm, CreateBankForm, HireEmployeeForm, ReplaceManagerForm, LoginForm, AccountWithdrawalForm
-from bank.models import Corporation, Bank, Employee, Workfor, Person, Customer, SystemAdmin, BankAccount, Checking, Access
+from .forms import *
+
+from bank.models import *
+
 from django.views.decorators.cache import never_cache
 from django.core.cache import cache
 from django.db import IntegrityError
 from psycopg2.errorcodes import UNIQUE_VIOLATION
+
+from .forms import CreateEmployeeRoleForm
 
 def get_url_names():
 	from django.apps import apps
@@ -82,6 +86,19 @@ def get_Employees():
 
 def get_Banks():
     list_of_banks = list(Bank.objects.all().values_list('bankid', flat=True).distinct())
+
+    # Format needed as (choice, value) and right now the output above is [perId1, perId2......], we need [(perId1, perId1), (perId2, perId2)] 
+
+    tuple_list = []
+
+    for bank in list_of_banks:
+        tuple_list.append((bank, bank))
+
+    return tuple_list
+
+
+def get_Customers():
+    list_of_banks = list(Customer.objects.all().values_list('perid', flat=True).distinct())
 
     # Format needed as (choice, value) and right now the output above is [perId1, perId2......], we need [(perId1, perId1), (perId2, perId2)] 
 
@@ -320,3 +337,175 @@ def account_withdrawal(request):
 	else:
 		messages.error(request, 'Access Denied.')
 		return redirect('/bank/index')
+
+
+
+##### 3 #####
+@never_cache
+def create_employee_role(request):
+    if request.method == 'POST':
+        form = CreateEmployeeRoleForm(request.POST, persons=get_Persons())
+        if form.is_valid():
+
+            if len(Employee.objects.filter(perid = form.cleaned_data['perID'])) == 0 and len(SystemAdmin.objects.filter(perid = form.cleaned_data['perID'])) == 0:
+                if len(Person.objects.filter(perid = form.cleaned_data['perID'])) == 0:
+                    
+                    new_person = Person(
+                        perid = form.cleaned_data['perID'],
+                    )
+                    new_person.save()
+                    
+                    new_bank_user = BankUser(
+                        perid = form.cleaned_data['perID'],
+                    )
+                    new_bank_user.save()
+                    
+                    new_employee_role = Employee(
+                        perid = form.cleaned_data['perID'],
+                        salary = form.cleaned_data['salary'],
+                        payments = form.cleaned_data['payments'],
+                        earned = form.cleaned_data['earned'])
+                    new_employee_role.save()
+                    
+                    return HttpResponse(status=200)
+
+            elif len(Customer.objects.filter(perid = form.cleaned_data['perID'])) > 0:
+                new_employee_role = Employee(
+                    perid = form.cleaned_data['perID'],
+                    salary = form.cleaned_data['salary'],
+                    payments = form.cleaned_data['payments'],
+                    earned = form.cleaned_data['earned'])
+                new_employee_role.save()
+                
+                return HttpResponse(status=200)
+    else:
+        form = CreateEmployeeRoleForm(persons=get_Persons())
+    return render(request, 'bank/create_employee_role.html', {'form': form})
+
+##### 4 #####
+@never_cache
+def create_customer_role(request):
+    if request.method == 'POST':
+        form = CreateCustomerRoleForm(request.POST, perid=get_Customers())
+        if form.is_valid():
+            
+            if len(SystemAdmin.objects.filter(perid = form.cleaned_data['perID'])) == 0 and len(Customer.objects.filter(perid = form.cleaned_data['perID'])) == 0:
+                if len(Employee.objects.filter(perid = form.cleaned_data['perID'])) >= 0:
+                    new_customer = Customer(
+                        perid = form.cleaned_data['perID'],
+                    )
+                    new_customer.save()
+                    
+                    new_person = Person(
+                        perid = form.cleaned_data['perID'],
+                    )
+                    new_person.save()
+                    
+                    new_bankuser = BankUser(
+                        perid = form.cleaned_data['perID'],
+                    )
+                    new_bankuser.save()
+                    
+                    new_customer = Customer(
+                        perid = form.cleaned_data['perID'],
+                    )
+                    new_customer.save()
+                    
+                    return HttpResponse(status=200)
+
+    else:
+        form = CreateCustomerRoleForm(perid=get_Customers())
+        
+    return render(request, 'bank/create_customer_role.html', {'form': form})
+
+
+
+# SCREEN 5 ##
+##### 5 #####
+@never_cache
+def stop_employee_and_customer_role(request):
+    if request.method == 'POST':
+        form1 = StopEmployeeRoleForm(request.POST, employee=get_Employees())
+        form2 = StopCustomerRoleForm(request.POST, customer=get_Customers())
+        if form1.is_valid():
+
+            if len(Employee.objects.filter(perid = form1.cleaned_data['perID'])) >= 1:
+
+                # TODO: Not sure if I should be getting first object or not
+                bank_id_var = Workfor.objects.filter(perid = form1.cleaned_data['perID'])
+                num_employees_in_bank_var = len(Workfor.objects.filter(perid = form1.cleaned_data['perID']))
+                
+                manager_var = Bank.objects.filter(bankid = bank_id_var[0].bankid)
+                manager_var = manager_var[0].manager
+                
+                if num_employees_in_bank_var > 1 and manager_var != form1.cleaned_data['perID']:
+
+                    Workfor.objects.filter(perid = form1.cleaned_data['perID']).delete()
+                    Employee.objects.filter(perid = form1.cleaned_data['perID']).delete()
+                    
+                    if len(Customer.objects.filter(perID = form1.cleaned_data['perID'])) == 0:
+                                                
+                        BankUser.objects.filter(perid = form1.cleaned_data['perID']).delete()
+                        Person.objects.filter(perid = form1.cleaned_data['perID']).delete()
+                        
+                        return HttpResponse(status=200)
+                        
+
+
+        if form2.is_valid():
+            if len(Customer.objects.filter(perid = form2.cleaned_data['perID'])) > 0:
+                
+                # accountId in (select accountID from access group by accountID having count(*) = 1))
+                # accountId_list = Access.objects.filter(Access.objects.count(accountid) == 1).values_list('accountid', flat=True)
+                # accountID_list = Access.objects.filter(Access.objects.count(accountid) == 1)
+                
+                # TODO
+                if len(Access.objects.filter(perid = form2.cleaned_data['perID'])) == 0:
+                    
+                    if len(Employee.objects.filter(perid = form2.cleaned_data['perID'])) > 0:
+                        Access.objects.filter(perid = form2.cleaned_data['perID']).delete()
+                        CustomerContacts.objects.filter(perid = form2.cleaned_data['perID']).delete()
+                        Customer.objects.filter(perid = form2.cleaned_data['perID']).delete()
+                        return HttpResponse(status=200)
+                    else:
+                        Access.objects.filter(perid = form2.cleaned_data['perID']).delete()
+                        CustomerContacts.objects.filter(perid = form2.cleaned_data['perID']).delete()
+                        Customer.objects.filter(perid = form2.cleaned_data['perID']).delete()
+                        BankUser.objects.filter(perid = form2.cleaned_data['perID']).delete()
+                        Person.objects.filter(perid = form2.cleaned_data['perID']).delete()
+                        return HttpResponse(status=200)
+    else:
+        form1 = StopEmployeeRoleForm(employee=get_Employees())
+        form2 = StopCustomerRoleForm(customer=get_Customers())
+        
+    return render(request, 'bank/stop_employee_and_customer_role.html', {'form1': form1, 'form2': form2})
+
+
+#### SCREEN 9, QUERY 11
+@never_cache
+def create_fee(request):
+    if request.method == 'POST':
+        form = CreateFeeForm(request.POST, meow=get_Banks(), potato=get_Accounts())
+        if form.is_valid():
+            
+            
+            # 	if exists (select * from interest_bearing where bankID = ip_bankID and accountID = ip_accountID)
+            formBankID = form.cleaned_data['bankID']
+            formAccountID = form.cleaned_data['accountID']
+
+            if len(InterestBearing.objects.filter(bankid = formBankID, accountid = formAccountID)) >= 1:
+        
+            # insert into interest_bearing_fees values (ip_bankID, ip_accountID, ip_fee_type);
+                new_interest_fee = InterestBearingFees(
+                    bankid = form.cleaned_data['bankID'],
+                    accountid = form.cleaned_data['accountID'],
+                    fee = form.cleaned_data['feeType']
+                )
+                new_interest_fee.save()
+        
+            return HttpResponse(status=200)
+    else:
+        form = CreateFeeForm(meow=get_Banks(), potato=get_Accounts())
+        
+    return render(request, 'bank/create_fee.html', {'form': form})
+

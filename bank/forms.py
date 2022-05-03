@@ -1,5 +1,6 @@
 from django import forms
-from .models import Employee, Person, Corporation, Bank, BankAccount
+from .models import Employee, Person, Corporation, Customer, Bank, BankAccount
+
 from django.views.decorators.cache import never_cache
 from django.core.cache import cache
 
@@ -85,3 +86,61 @@ class AccountWithdrawalForm(forms.Form):
     class Meta:
         model = BankAccount
         fields = ('bankid', 'accountID', 'amount',)
+
+
+
+####### kw
+
+
+# ##### 3 ##### 
+class CreateEmployeeRoleForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.persons = kwargs.pop('persons')
+        super(CreateEmployeeRoleForm, self).__init__(*args, **kwargs)
+        self.fields['perID'].widget = forms.Select(choices=self.persons)
+        
+    perID = forms.CharField(label="")
+    salary = forms.IntegerField(label="Salary")
+    payments = forms.IntegerField(label="# of Payments")
+    earned = forms.IntegerField(label="Accumulated Earnings")
+
+##### 4 #####
+class CreateCustomerRoleForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.perid = kwargs.pop('perid', None)
+        super(CreateCustomerRoleForm, self).__init__(*args, **kwargs)
+        self.fields['perID'].widget = forms.Select(choices=self.perid)
+
+    perID = forms.CharField(label="")
+    
+# ## SCREEN 5 ##
+class StopEmployeeRoleForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.perids = kwargs.pop('employee', None)
+        super(StopEmployeeRoleForm, self).__init__(*args, **kwargs)
+        self.fields['perID'].widget = forms.Select(choices=self.perids)
+    
+    perID = forms.CharField(label="Employee ID")
+
+class StopCustomerRoleForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.perids = kwargs.pop('customer', None)
+        super(StopCustomerRoleForm, self).__init__(*args, **kwargs)
+        self.fields['perID'].widget = forms.Select(choices=self.perids)
+        
+    perID = forms.CharField(label="Customer ID")
+
+##### SCREEN 11
+class CreateFeeForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.meow = kwargs.pop('meow', None)
+        self.potato = kwargs.pop('potato', None)
+    
+        super(CreateFeeForm, self).__init__(*args, **kwargs)
+        
+        self.fields["bankID"].widget = forms.Select(choices=self.meow)
+        self.fields["accountID"].widget = forms.Select(choices=self.potato)
+    
+    bankID = forms.CharField(label="Bank")
+    accountID = forms.CharField(label="Account")
+    feeType = forms.CharField(label="Fee Type", max_length=100)
