@@ -6,7 +6,9 @@
 {% if data %}
     <ul>
     {% for name, banklink in data %}
-        <li><a href="/bank/{{ banklink }}">{{ name }}</a></li>
+        <button type="button">
+            <li><a href="/bank/{{ banklink }}">{{ name }}</a></li>
+        </button>
     {% endfor %}
     </ul>
 {% else %}

@@ -7,7 +7,7 @@ from django.db.models.functions import Cast
 # Create your views here.
 from django.contrib import messages
 import datetime
-from .forms import CreateCorporationForm, CreateBankForm, get_Persons, HireEmployeeForm, ReplaceManagerForm, LoginForm, AccountWithdrawalForm
+from .forms import CreateCorporationForm, CreateBankForm, HireEmployeeForm, ReplaceManagerForm, LoginForm, AccountWithdrawalForm
 from bank.models import *
 from django.views.decorators.cache import never_cache
 from django.core.cache import cache
