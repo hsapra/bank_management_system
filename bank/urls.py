@@ -11,6 +11,7 @@ urlpatterns = [
     # path('manager_home', views.manager_home, name='manager_home'),
     # path('customer_home', views.customer_home, name='customer_home'),
     path('create_corporation', views.create_corporation, name='create_corporation'),
+    path('choose_manager_customer_role', views.choose_manager_customer_role, name='choose_manager_customer_role'),
     path('create_bank', views.create_bank, name='create_bank'),
     path('display_account_stats', views.display_account_stats, name='display_account_stats'),
     path('display_bank_stats', views.display_bank_stats, name='display_bank_stats'),

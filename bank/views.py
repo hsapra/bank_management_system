@@ -135,9 +135,11 @@ def is_checking(bankID, accountID):
 
 ###### VIEWS ##########
 
-
+@never_cache
 def login(request):
+	cache.clear()
 	if 'perID' in request.session and request.session['perID']:
+		print("HOLLAAAA")
 		return index(request)
 
 	else:
@@ -151,6 +153,8 @@ def login(request):
 					messages.error(request, "Invalid Username")
 				elif Person.objects.get(pk=perID).pwd != pwd:
 					messages.error(request, "Invalid Password")
+				elif len(Customer.objects.filter(pk=perID)) == 0 and len(SystemAdmin.objects.filter(pk=perID)) == 0 and len(Bank.objects.filter(manager_id=perID)) == 0:
+					messages.error(request, "Access Denied. Employees do not have access to this system yet")
 				else:
 					messages.success(request, "Logged In")
 					request.session['perID'] = perID
@@ -161,9 +165,11 @@ def login(request):
 		else:
 			form = LoginForm()
 		return render(request, 'bank/login.html', {'form': form})
-
+@never_cache
 def logout(request):
+	cache.clear()
 	if 'perID' in request.session:
+		print("Hello")
 		perID = request.session.pop('perID')
 	return redirect('/bank/')
 
@@ -173,13 +179,16 @@ def index(request):
 	if 'perID' in request.session and request.session['perID']: 
 		if request.session['isAdmin']:
 			return admin_home(request)
+		elif request.session['isManager'] and request.session['isCustomer']:
+			return choose_manager_customer_role(request)
 		elif request.session['isManager']:
 			return manager_home(request)
 		elif request.session['isCustomer']:
 			return customer_home(request)
 		else:
 			role = "Employee/Person"
-		return customer_home(request)
+			messages.error(request, 'Access Denied. Employees do not have access to this system yet')
+			logout(request)
 	else:
 		messages.error(request, 'Access Denied. Please Log In with the correct credentials')
 		return redirect('/bank/')
@@ -215,6 +224,21 @@ def customer_home(request):
 def manage_accounts(request):
 	if 'perID' in request.session and request.session['perID'] is not None and (request.session['isCustomer'] or request.session['isAdmin']):
 		return render(request, 'bank/manage_accounts.html')
+	else:
+		messages.error(request, 'Access Denied. Please Log In with the correct credentials')
+		return redirect('/bank/')
+
+
+@never_cache
+def choose_manager_customer_role(request):
+	if 'perID' in request.session and request.session['perID'] is not None and (request.session['isCustomer'] and request.session['isManager']):
+		if request.method == 'POST':
+			if 'manager' in request.POST:
+				request.session['isCustomer'] = False
+			elif 'customer' in request.POST:
+				request.session['isManager'] = False
+			return redirect('/bank/')
+		return render(request, 'bank/choose_manager_customer_role.html')
 	else:
 		messages.error(request, 'Access Denied. Please Log In with the correct credentials')
 		return redirect('/bank/')
