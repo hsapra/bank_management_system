@@ -7,11 +7,12 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css" >
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" ></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js" ></script>
-
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
     <title>Bank Management System</title>
     <style type="text/css">
       * {
@@ -83,7 +84,7 @@ form {
 }
 
 .button {
-  background-color: #4CAF50; /* Green */
+  
   border: none;
   color: white;
   padding: 15px 32px;
@@ -98,8 +99,33 @@ form {
   float: right;
 }
 
-.button1:hover {
+.button1 {
+  background-color: #4CAF50; /* Green */
+}
+
+.button2 {
+  background-color: #1f2421;
+  border-radius: 10px;
+  width: 20vw;
+}
+
+.button:hover {
   box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+}
+
+table.sortable thead {
+    background-color:#eee;
+    color:#666666;
+    font-weight: bold;
+    cursor: default;
+}
+body {
+  font-family:Avenir,sans-serif;
+}
+
+h1 {
+ line-height:1em;
+
 }
     </style>
   </head>
@@ -114,8 +140,13 @@ form {
     {% endblock %} 
   
       <!-- Optional Javascript -->
-      <a href="/bank/" style="text-align: center !important; padding-left: 100px;">Back</a>
+      <a href="/bank/"><button class="button button1" style="float: left !important; margin-left: 30px;">Back</button></a>
 <!--       <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
       <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
  -->  </body>
+ <script type="text/javascript">
+   $(document).ready(function() {
+    $('#example').DataTable();
+} );
+ </script>
 </html>

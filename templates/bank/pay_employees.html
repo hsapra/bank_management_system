@@ -1,0 +1,12 @@
+{% extends 'bank/header.html' %}
+
+{% block content %}
+
+<div class="container">
+    <form action="/bank/pay_employees" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Pay Employees">
+    </form>
+</div>
+
+{% endblock %}

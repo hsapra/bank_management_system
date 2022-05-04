@@ -1,0 +1,34 @@
+{% extends 'bank/header.html' %}
+
+{% block content %}
+
+<div class="content" style="padding: 30px;">
+    <h1>Corporation Stats</h1>
+
+<table id = "example" class="table table-striped">
+    <thead class="thead-dark">
+    <tr>
+        <th>Corporation ID</th>
+        <th>Short Name</th>
+        <th>Formal Name</th>
+        <th>Number of Banks</th>
+        <th>Corporation Assets</th>
+        <th>Total Assets</th>
+    </tr>
+</thead>
+    {% for entry in joined_table %}
+    <tr>
+        <td>{{ entry.corp_id }}</td>
+        <td>{{ entry.short_name }}</td>
+        <td>{{ entry.formal_name }}</td>
+        <td>{{ entry.num_banks}}</td>
+        <td>{{ entry.corp_assets }}</td>
+        <td>{{ entry.total_assets }}</td>
+        
+    </tr>
+    {% endfor %}
+</table>
+
+
+</div>
+{% endblock %}

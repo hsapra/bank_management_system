@@ -1,0 +1,28 @@
+{% extends 'bank/header.html' %}
+
+{% block content %}
+
+
+<div class="container">
+    <h3>Add Account</h3>
+    <form action="/bank/add_account_access" method="post">
+        {% csrf_token %}
+        {{ form1 }}
+        <input type="submit" name="add" value="Submit">
+    </form>
+</div>
+
+
+<br>
+
+<div class="container">
+    <h3>Add Account Access</h3>
+    <form action="/bank/add_account_access" method="post">
+        {% csrf_token %}
+        {{ form2 }}
+        <input type="submit" name="access" value="Submit">
+    </form>
+</div>
+
+
+{% endblock %}
