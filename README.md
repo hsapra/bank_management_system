@@ -1,6 +1,6 @@
 # Bank Management System
 
-Bank Management System is a platform created for CS 4400. It allows seamless communication between the user and the bank_management database.
+Bank Management System is a platform created for CS 4400. It allows seamless communication between the user and the bank_management database. It mainly uses Django, Python for backend logic, and HTML for the frontend views.
 
 ## Set Up
 
