@@ -1,23 +1,19 @@
-<!-- need to display name_of_bank, account_identifier, account_assets, number_of_owners -->
-<html>
-<head>
-<style>
-table, th, td {
-  border: 1px solid black;
-}
-</style>
-</head>
-<body>
+{% extends 'bank/header.html' %}
 
-<h1>Account Stats</h1>
+{% block content %}
 
-<table>
-    <tr>
-        <th>Bank Name</th>
-        <th>Account ID</th>
-        <th>Account Assets</th>
-        <th>Number of Owners</th>
-    </tr>
+<div class="content" style="padding: 30px;">
+    <h1>Account Stats</h1>
+
+<table id = "example" class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Bank Name</th>
+            <th>Account ID</th>
+            <th>Account Assets</th>
+            <th>Number of Owners</th>
+        </tr>
+    </thead>
     {% for entry in joined_table %}
     <tr>
         <td>{{ entry.bank_name }}</td>
@@ -28,3 +24,6 @@ table, th, td {
     </tr>
     {% endfor %}
 </table>
+
+</div>
+{% endblock %}

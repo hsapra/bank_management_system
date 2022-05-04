@@ -1,0 +1,16 @@
+{% extends 'bank/header.html' %}
+
+{% block content %}
+
+
+
+<h3>Create Fee</h3>
+
+<form action="/bank/create_fee" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
+</form>
+
+
+{% endblock %}

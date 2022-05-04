@@ -1,0 +1,33 @@
+{% extends 'bank/header.html' %}
+
+{% block content %}
+<div class="content" style="padding: 30px;">
+    <p style="font-size: 20px;">Welome {{perID}}. You are a {{role}}</p>
+    <div class="container" style="background-color: white;">
+        <div class="row">
+            <div class="col-sm">
+                 <a href="/bank/manage_accounts"><button class="button button2" style="float: left !important; margin-left: 30px;">Manage Accounts</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/account_deposit"><button class="button button2" style="float: left !important; margin-left: 30px;">Account Deposit</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/account_withdrawal"><button class="button button2" style="float: left !important; margin-left: 30px;">Account Withdrawal</button></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                 <a href="/bank/start_overdraft"><button class="button button2" style="float: left !important; margin-left: 30px;">Start Overdraft</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/stop_overdraft"><button class="button button2" style="float: left !important; margin-left: 30px;">Stop Overdraft</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/account_transfer"><button class="button button2" style="float: left !important; margin-left: 30px;">Transfer Money</button></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

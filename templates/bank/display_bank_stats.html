@@ -1,17 +1,12 @@
-<!-- # need bank_identifier, name_of_corporation, name_of_bank, street, city, state, zip, number_of_accounts, bank_assets, total_assets -->
-<html>
-<head>
-<style>
-table, th, td {
-  border: 1px solid black;
-}
-</style>
-</head>
-<body>
+{% extends 'bank/header.html' %}
 
-<h1>Bank Stats</h1>
+{% block content %}
 
-<table>
+<div class="content" style="padding: 30px;">
+    <h1>Bank Stats</h1>
+
+<table id = "example" class="table table-striped">
+    <thead class="thead-dark">
     <tr>
         <th>Bank ID</th>
         <th>Corporation Name</th>
@@ -24,6 +19,7 @@ table, th, td {
         <th>Bank Assets</th>
         <th>Total Assets</th>
     </tr>
+</thead>
     {% for entry in joined_table %}
     <tr>
         <td>{{ entry.bank_id }}</td>
@@ -40,3 +36,6 @@ table, th, td {
     </tr>
     {% endfor %}
 </table>
+
+</div>
+{% endblock %}

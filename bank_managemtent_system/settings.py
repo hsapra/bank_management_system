@@ -84,9 +84,10 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'bank_management',
         'USER': 'root',
-        'PASSWORD': '4college@GT',
+        'PASSWORD': 'hello@123',
         'HOST': 'localhost',
         'PORT': '3306',
+        'OPTIONS': { 'init_command': 'SET foreign_key_checks = 0;'}
     }
 }
 

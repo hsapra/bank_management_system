@@ -1,17 +1,12 @@
-<!-- # need corporation_identifier, short_name, formal_name, number_of_banks, corporation_assets, total_assets -->
-<html>
-<head>
-<style>
-table, th, td {
-  border: 1px solid black;
-}
-</style>
-</head>
-<body>
+{% extends 'bank/header.html' %}
 
-<h1>Corporation Stats</h1>
+{% block content %}
 
-<table>
+<div class="content" style="padding: 30px;">
+    <h1>Corporation Stats</h1>
+
+<table id = "example" class="table table-striped">
+    <thead class="thead-dark">
     <tr>
         <th>Corporation ID</th>
         <th>Short Name</th>
@@ -20,6 +15,7 @@ table, th, td {
         <th>Corporation Assets</th>
         <th>Total Assets</th>
     </tr>
+</thead>
     {% for entry in joined_table %}
     <tr>
         <td>{{ entry.corp_id }}</td>
@@ -32,3 +28,7 @@ table, th, td {
     </tr>
     {% endfor %}
 </table>
+
+
+</div>
+{% endblock %}

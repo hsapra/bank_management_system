@@ -1,0 +1,74 @@
+{% extends 'bank/header.html' %}
+
+{% block content %}
+<div class="content" style="padding: 30px;">
+    <p style="font-size: 20px;">Welome {{perID}}. You are an {{role}}</p>
+    <div class="container" style="background-color: white;">
+        <div class="row">
+            <div class="col-sm">
+                 <a href="/bank/display_account_stats"><button class="button button2" style="float: left !important; margin-left: 30px;">Display Account Stats</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/display_bank_stats"><button class="button button2" style="float: left !important; margin-left: 30px;">Display Bank Stats</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/display_corporation_stats"><button class="button button2" style="float: left !important; margin-left: 30px;">Display Corporation Stats</button></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                 <a href="/bank/display_customer_stats"><button class="button button2" style="float: left !important; margin-left: 30px;">Display Customer Stats</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/display_employee_stats"><button class="button button2" style="float: left !important; margin-left: 30px;">Display Employee Stats</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/hire_employee"><button class="button button2" style="float: left !important; margin-left: 30px;">Hire Worker</button></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                 <a href="/bank/replace_manager"><button class="button button2" style="float: left !important; margin-left: 30px;">Replace Manager</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/manage_accounts"><button class="button button2" style="float: left !important; margin-left: 30px;">Manage Accounts</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/create_corporation"><button class="button button2" style="float: left !important; margin-left: 30px;">Create Corporation</button></a>
+            </div>
+        </div>
+         <div class="row">
+            <div class="col-sm">
+                 <a href="/bank/start_overdraft"><button class="button button2" style="float: left !important; margin-left: 30px;">Start Overdraft</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/stop_overdraft"><button class="button button2" style="float: left !important; margin-left: 30px;">Stop Overdraft</button></a>
+            </div>
+            <div class="col-sm">
+                <a href="/bank/create_employee_role"><button class="button button2" style="float: left !important; margin-left: 30px;">Create Employee Role</button></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                 <a href="/bank/create_customer_role"><button class="button button2" style="float: left !important; margin-left: 30px;">Create Customer Role</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/stop_employee_and_customer_role"><button class="button button2" style="float: left !important; margin-left: 30px;">Stop Employee/Customer Role</button></a>
+            </div>
+            <div class="col-sm">
+                <a href="/bank/create_bank"><button class="button button2" style="float: left !important; margin-left: 30px;">Create Bank</button></a>
+            </div>
+        </div>
+                <div class="row">
+            <div class="col-sm">
+                 <a href="/bank/create_fee"><button class="button button2" style="float: left !important; margin-left: 30px;">Create Fee</button></a>
+            </div>
+            <div class="col-sm">
+                 <a href="/bank/pay_employees"><button class="button button2" style="float: left !important; margin-left: 30px;">Pay Employees</button></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

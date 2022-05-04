@@ -10,7 +10,7 @@ from django.db import models
 class Access(models.Model):
     perid = models.ForeignKey('Customer', models.DO_NOTHING, db_column='perID', related_name='+')  # Field name made lowercase.
     bankid = models.OneToOneField('BankAccount', models.DO_NOTHING, db_column='bankID', primary_key=True)  # Field name made lowercase.
-    accountid = models.ForeignKey('BankAccount', models.DO_NOTHING, db_column='accountID', related_name='+')  # Field name made lowercase.
+    accountid = models.CharField(db_column='accountID', max_length=100)  # Field name made lowercase.  # Field name made lowercase.
     dtsharestart = models.DateField(db_column='dtShareStart')  # Field name made lowercase.
     dtaction = models.DateField(db_column='dtAction', blank=True, null=True)  # Field name made lowercase.
 
@@ -18,7 +18,6 @@ class Access(models.Model):
         managed = False
         db_table = 'access'
         unique_together = (('bankid', 'perid', 'accountid'),)
-
 
 class Bank(models.Model):
     bankid = models.CharField(db_column='bankID', primary_key=True, max_length=100)  # Field name made lowercase.
@@ -67,7 +66,7 @@ class BankUser(models.Model):
 
 class Checking(models.Model):
     bankid = models.OneToOneField(BankAccount, models.DO_NOTHING, db_column='bankID', primary_key=True)  # Field name made lowercase.
-    accountid = models.ForeignKey(BankAccount, models.DO_NOTHING, db_column='accountID', related_name='+')  # Field name made lowercase.
+    accountid = models.CharField(db_column='accountID', max_length=100)  # Field name made lowercase.
     protectionbank = models.ForeignKey('Savings', models.DO_NOTHING, db_column='protectionBank', blank=True, null=True, related_name='+')  # Field name made lowercase.
     protectionaccount = models.ForeignKey('Savings', models.DO_NOTHING, db_column='protectionAccount', blank=True, null=True, related_name='+')  # Field name made lowercase.
     amount = models.IntegerField(blank=True, null=True)
@@ -122,7 +121,7 @@ class Employee(models.Model):
 
 class InterestBearing(models.Model):
     bankid = models.OneToOneField(BankAccount, models.DO_NOTHING, db_column='bankID', primary_key=True)  # Field name made lowercase.
-    accountid = models.ForeignKey(BankAccount, models.DO_NOTHING, db_column='accountID', related_name='+')  # Field name made lowercase.
+    accountid = models.CharField(db_column='accountID', max_length=100)  # Field name made lowercase. 
     interest_rate = models.IntegerField(blank=True, null=True)
     dtdeposit = models.DateField(db_column='dtDeposit', blank=True, null=True)  # Field name made lowercase.
 
@@ -134,7 +133,7 @@ class InterestBearing(models.Model):
 
 class InterestBearingFees(models.Model):
     bankid = models.OneToOneField(InterestBearing, models.DO_NOTHING, db_column='bankID', primary_key=True)  # Field name made lowercase.
-    accountid = models.ForeignKey(InterestBearing, models.DO_NOTHING, db_column='accountID', related_name='+')  # Field name made lowercase.
+    accountid = models.CharField(db_column='accountID', max_length=100)  # Field name made lowercase.
     fee = models.CharField(max_length=100)
 
     class Meta:
@@ -145,7 +144,7 @@ class InterestBearingFees(models.Model):
 
 class Market(models.Model):
     bankid = models.OneToOneField(InterestBearing, models.DO_NOTHING, db_column='bankID', primary_key=True)  # Field name made lowercase.
-    accountid = models.ForeignKey(InterestBearing, models.DO_NOTHING, db_column='accountID', related_name='+')  # Field name made lowercase.
+    accountid = models.CharField(db_column='accountID', max_length=100)  # Field name made lowercase.
     maxwithdrawals = models.IntegerField(db_column='maxWithdrawals', blank=True, null=True)  # Field name made lowercase.
     numwithdrawals = models.IntegerField(db_column='numWithdrawals', blank=True, null=True)  # Field name made lowercase.
 
@@ -166,7 +165,7 @@ class Person(models.Model):
 
 class Savings(models.Model):
     bankid = models.OneToOneField(InterestBearing, models.DO_NOTHING, db_column='bankID', primary_key=True)  # Field name made lowercase.
-    accountid = models.ForeignKey(InterestBearing, models.DO_NOTHING, db_column='accountID', related_name='+')  # Field name made lowercase.
+    accountid = models.CharField(db_column='accountID', max_length=100)  # Field name made lowercase.
     minbalance = models.IntegerField(db_column='minBalance', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
