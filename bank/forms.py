@@ -23,11 +23,11 @@ class CreateBankForm(forms.Form):
         self.fields['corpID'].widget = forms.Select(choices=self.corporations)
 
     bankID = forms.CharField(label='Bank ID', max_length=100)
-    bankName = forms.CharField(label = 'Bank Name', max_length=100)
-    street = forms.CharField(label = 'Street', max_length=100)
-    city = forms.CharField(label = 'City', max_length=100)
-    state = forms.CharField(label = 'State', max_length=100)
-    zip_code = forms.CharField(label = 'Zip', max_length=100)
+    bankName = forms.CharField(label = 'Bank Name', max_length=100, required=False)
+    street = forms.CharField(label = 'Street', max_length=100, required=False)
+    city = forms.CharField(label = 'City', max_length=100, required=False)
+    state = forms.CharField(label = 'State', max_length=100, required=False)
+    zip_code = forms.CharField(label = 'Zip', max_length=100, required=False)
     resAssets = forms.IntegerField(label='Reserved Assets', required=False)
     corpID = forms.CharField(label='Corporation')
     manager = forms.CharField(label='Manager')
@@ -48,7 +48,7 @@ class HireEmployeeForm(forms.Form):
 
     bankID = forms.CharField(label='Bank ID')
     perID = forms.CharField(label='Employee')
-    salary = forms.IntegerField(label='Salary')
+    salary = forms.IntegerField(label='Salary', required=False)
 
     class Meta:
         model = Employee
@@ -64,7 +64,7 @@ class ReplaceManagerForm(forms.Form):
 
     bankID = forms.CharField(label='Bank ID')
     perID = forms.CharField(label='Employee')
-    salary = forms.IntegerField(label='Salary')
+    salary = forms.IntegerField(label='Salary', required=False)
 
     class Meta:
         model = Employee
